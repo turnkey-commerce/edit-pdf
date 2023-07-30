@@ -1,16 +1,16 @@
-# Edit PDF
+# edit-pdf
 
-A Python program for making small edits in a PDF file by substituting certain text strings with a given substitition string. Rather than modifying the original PDF file it will create a new file with the replaced text.
+edit-pdf is a simple Python program for making global edits in a PDF file by globally replacing text strings to a given substitition string. Rather than modifying the original PDF file it will create a new file with the replaced text.
 
-One or more PDF files can be processed in batch by placing them in a given directory and specifying the directory to process.
+One or more PDF files can be processed in batch by placing them in a given folder and specifying the folder to process.
 
 Applications:
 
-* Hide parts of an account number of a bank statement by substituting asterisks before sending to third parties.
+* Hide parts of an account number of a bank statement by substituting asterisks (*) before sending to third parties.
 
 * Fix incorrect addresses or other information.
 
-* Redact sensitive information from a document.
+* Redact sensitive information from a document by replacing with asterisks (*).
 
 ## Install
 
@@ -20,13 +20,13 @@ Applications:
     https://www.python.org/downloads/
     ```
 
- 2. Clone the EditPDF repository:
+ 2. Clone the edit-pdf repository:
 
     ```cmd
     git clone https://github.com/turnkey-commerce/edit-pdf.git
     ```
 
- 3. In the EditPDF directory create a virtual environment:
+ 3. In the edit-pdf directory create a virtual environment:
 
     ```cmd
     python -m venv env
