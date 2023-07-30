@@ -58,14 +58,18 @@ def main():
     edit_pdf_files(folder_path)
 
 def edit_pdf_files(folder_path):
+    output_path = os.path.join(folder_path, "edited")
+    if not os.path.isdir(output_path):
+        os.mkdir(output_path)
     for filename in [f for f in listdir(folder_path) if isfile(join(folder_path, f))]:
+        print("Processing: " + filename)
         filename_base = os.path.splitext(filename)[0]
-        output_filename = os.path.join(folder_path, "results", filename_base + ".result.pdf")
+        output_filename = os.path.join(output_path, filename_base + ".edited.pdf")
         reader = PdfFileReader(os.path.join(folder_path, filename))
         writer = PdfFileWriter()
         number_of_pages = len(reader.pages)
         for page_number in range(number_of_pages):
-            print(page_number)
+            print("Page " + str(page_number + 1) + "...")
             page = reader.getPage(page_number)
             page.mergePage(reader.getPage(page_number))     
 

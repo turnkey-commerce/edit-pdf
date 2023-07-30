@@ -14,15 +14,25 @@ Applications:
 
 ## Install
 
- 1. Install Python 3.
- 2. Clone the EditPDF repository.
+ 1. Install Python 3 if not already installed:
+
+    ```cmd
+    https://www.python.org/downloads/
+    ```
+
+ 2. Clone the EditPDF repository:
+
+    ```cmd
+    git clone https://github.com/turnkey-commerce/edit-pdf.git
+    ```
+
  3. In the EditPDF directory create a virtual environment:
 
     ```cmd
     python -m venv env
     ```
 
- 4. Activate the env:
+ 4. Activate the env by running the appropriate script in the Scripts folder:
 
     ```cmd
     .\env\Scripts\activate.bat
@@ -43,11 +53,13 @@ Applications:
     Girard, Girardo
     ```
 
- 2. Run the program with an argument to specify the folder of PDFs to process:
+ 2. Run the program with an argument to specify the folder containing the PDFs to process:
 
     ```cmd
-    python edit-pdf.py pdfs
+    python edit-pdf.py folder
     ```
+
+ 3. The program will output a new version of each of the files to a subfolder called "edited". The edited files will also have ".edited" string added to the filename in front of the pdf extension, e.g. "filename.*edited*.pdf"
 
 ## License
 
