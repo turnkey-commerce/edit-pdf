@@ -4,7 +4,7 @@ from os.path import isfile, join
 import sys
 import csv
 import PyPDF2
-from PyPDF2 import PdfFileReader, PdfFileWriter
+from PyPDF2 import PdfReader, PdfWriter
 from PyPDF2.generic import DecodedStreamObject, StreamObject
 from PyPDF2 import filters
 
@@ -23,24 +23,25 @@ def replace(text):
 
 class EncodedStreamObject(StreamObject):
     def __init__(self):
-        self.decodedSelf = None
+        self.decoded_self = None
 
-    def getData(self):
-        if self.decodedSelf:
-            return self.decodedSelf.getData()
+    def get_data(self):
+        if self.decoded_self:
+            return self.decoded_self.get_data()
         else:
             decoded = DecodedStreamObject()
 
-            decoded._data = filters.decodeStreamData(self)
+            decoded._data = filters.decode_stream_data(self)
             decoded._data = replace(decoded._data)
 
             for key, value in list(self.items()):
                 if not key in ("/Length", "/Filter", "/DecodeParms"):
                     decoded[key] = value
-            self.decodedSelf = decoded
+            self.decoded_self = decoded
             return decoded._data
-        
-PyPDF2.generic.EncodedStreamObject = EncodedStreamObject
+
+# Override with replacement version
+PyPDF2.generic._data_structures.EncodedStreamObject = EncodedStreamObject
 
 def main():
     # Get the folder from the first argument.
@@ -57,6 +58,7 @@ def main():
 
     edit_pdf_files(folder_path)
 
+
 def edit_pdf_files(folder_path):
     output_path = os.path.join(folder_path, "edited")
     if not os.path.isdir(output_path):
@@ -65,15 +67,15 @@ def edit_pdf_files(folder_path):
         print("Processing: " + filename)
         filename_base = os.path.splitext(filename)[0]
         output_filename = os.path.join(output_path, filename_base + ".edited.pdf")
-        reader = PdfFileReader(os.path.join(folder_path, filename))
-        writer = PdfFileWriter()
+        reader = PdfReader(os.path.join(folder_path, filename))
+        writer = PdfWriter()
         number_of_pages = len(reader.pages)
         for page_number in range(number_of_pages):
             print("Page " + str(page_number + 1) + "...")
-            page = reader.getPage(page_number)
-            page.mergePage(reader.getPage(page_number))     
+            page = reader.pages[page_number]
+            page.merge_page(reader.pages[page_number])     
 
-            writer.addPage(page)
+            writer.add_page(page)
         
         with open(output_filename, 'wb') as out_file:
             writer.write(out_file)
