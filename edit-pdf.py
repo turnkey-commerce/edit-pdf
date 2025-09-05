@@ -3,10 +3,7 @@ from os import listdir
 from os.path import isfile, join
 import sys
 import csv
-import PyPDF2
-from PyPDF2 import PdfReader, PdfWriter
-from PyPDF2.generic import DecodedStreamObject, StreamObject
-from PyPDF2 import filters
+import pymupdf
 
 target_folder = "converted_files"
 substitution_dict = {}
@@ -21,27 +18,6 @@ def replace(text):
 
     return text
 
-class EncodedStreamObject(StreamObject):
-    def __init__(self):
-        self.decoded_self = None
-
-    def get_data(self):
-        if self.decoded_self:
-            return self.decoded_self.get_data()
-        else:
-            decoded = DecodedStreamObject()
-
-            decoded._data = filters.decode_stream_data(self)
-            decoded._data = replace(decoded._data)
-
-            for key, value in list(self.items()):
-                if not key in ("/Length", "/Filter", "/DecodeParms"):
-                    decoded[key] = value
-            self.decoded_self = decoded
-            return decoded._data
-
-# Override with replacement version
-PyPDF2.generic._data_structures.EncodedStreamObject = EncodedStreamObject
 
 def main():
     # Get the folder from the first argument.
@@ -63,23 +39,31 @@ def edit_pdf_files(folder_path):
     output_path = os.path.join(folder_path, "edited")
     if not os.path.isdir(output_path):
         os.mkdir(output_path)
-    for filename in [f for f in listdir(folder_path) if isfile(join(folder_path, f))]:
+    for filename in [f for f in listdir(folder_path) if isfile(join(folder_path, f)) and f != 'desktop.ini']:
         print("Processing: " + filename)
         filename_base = os.path.splitext(filename)[0]
         output_filename = os.path.join(output_path, filename_base + ".edited.pdf")
-        reader = PdfReader(os.path.join(folder_path, filename))
-        writer = PdfWriter()
-        number_of_pages = len(reader.pages)
-        for page_number in range(number_of_pages):
+        doc = pymupdf.open(os.path.join(folder_path, filename))
+       
+        page_number = 0
+        for page in doc:
             print("Page " + str(page_number + 1) + "...")
-            page = reader.pages[page_number]
-            page.merge_page(reader.pages[page_number])     
 
-            writer.add_page(page)
-        
-        with open(output_filename, 'wb') as out_file:
-            writer.write(out_file)
-            print("Wrote: " + output_filename)
+            for s in substitution_dict.items():
+                text_instances = page.search_for(s[0])
+                # Redact each instance found, increasing the textbox size
+                for inst in text_instances:
+                    inst.y0 = inst.y0 - 2
+                    inst.y1 = inst.y1 + 2
+                    inst.x0 = inst.x0 + 2
+                    inst.x1 = inst.x1 + 2
+                    page.add_redact_annot(inst, text=s[1], fontsize=11)
+            # Apply the redactions and insert the new text
+            page.apply_redactions()
+
+            page_number += 1
+        doc.save(output_filename)
+        print("Wrote: " + output_filename)
 
 
 def check_input_folder(folder_path):
